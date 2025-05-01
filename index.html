@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محسن البرومبت للذكاء الاصطناعي</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #280052;
+            --secondary-color: #FF00A8;
+            --bg-gradient-start: #280052;
+            --bg-gradient-end: #1a0033;
+            --text-color: #ffffff;
+            --secondary-text-color: #a0aec0;
+            --accent-color: #3a0080;
+            --card-bg: #1f1f1f;
+            --input-bg: #2d2d2d;
+        }
+        
+        body {
+            font-family: 'Cairo', 'Roboto', sans-serif;
+            background: linear-gradient(to bottom, var(--bg-gradient-start), var(--bg-gradient-end));
+            min-height: 100vh;
+            color: var(--text-color);
+        }
+        
+        body.en {
+            font-family: 'Roboto', 'Cairo', sans-serif;
+            direction: ltr;
+        }
+        
+        .navbar {
+            background-color: rgba(26, 0, 51, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary-color);
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #d600a3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 0, 168, 0.3);
+        }
+        
+        .btn-outline {
+            border: 1px solid var(--secondary-color);
+            color: var(--secondary-color);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        textarea, input {
+            background-color: var(--input-bg);
+            border: 1px solid #444;
+            color: var(--text-color);
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        textarea:focus, input:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(255, 0, 168, 0.2);
+            outline: none;
+        }
+        
+        .template-card {
+            background-color: #2a2a2a;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .template-card:hover {
+            background-color: #333;
+            transform: translateY(-5px);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 12px 20px;
+            background-color: var(--secondary-color);
+            color: white;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .glow {
+            position: relative;
+        }
+        
+        .glow::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: inherit;
+            box-shadow: 0 0 15px rgba(255, 0, 168, 0.5);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .glow:hover::after {
+            opacity: 1;
+        }
+        
+        .tag {
+            display: inline-block;
+            background-color: #333;
+            border-radius: 4px;
+            padding: 4px 8px;
+            margin: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tag:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .tag.active {
+            background-color: var(--secondary-color);
+        }
+        
+        .saved-prompt {
+            background-color: #2a2a2a;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .saved-prompt:hover {
+            background-color: #333;
+        }
+        
+        .floating-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--secondary-color), #9900ff);
+            filter: blur(20px);
+            z-index: -1;
+            opacity: 0.15;
+        }
+        
+        .circle-1 {
+            top: 15%;
+            right: 10%;
+            width: 200px;
+            height: 200px;
+        }
+        
+        .circle-2 {
+            bottom: 20%;
+            left: 5%;
+            width: 250px;
+            height: 250px;
+        }
+
+        /* Background pattern */
+        .bg-pattern {
+            background-image: 
+                radial-gradient(circle at 25px 25px, rgba(255, 0, 168, 0.15) 2px, transparent 0),
+                radial-gradient(circle at 75px 75px, rgba(255, 0, 168, 0.1) 2px, transparent 0);
+            background-size: 100px 100px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -2;
+            opacity: 0.5;
+        }
+        
+        /* For language switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #444;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--secondary-color);
+        }
+        
+        input:focus + .slider {
+            box-shadow: 0 0 1px var(--secondary-color);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+        
+        /* Animation keyframes */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease forwards;
+        }
+        
+        .fade-in-1 { animation-delay: 0.1s; }
+        .fade-in-2 { animation-delay: 0.2s; }
+        .fade-in-3 { animation-delay: 0.3s; }
+        .fade-in-4 { animation-delay: 0.4s; }
+        
+        /* Word count display */
+        .word-count {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 12px;
+            color: #888;
+        }
+        
+        /* AI Logo */
+        .ai-logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--secondary-color), #9900ff);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 24px;
+            margin-right: 15px;
+            box-shadow: 0 4px 15px rgba(255, 0, 168, 0.3);
+        }
+    </style>
+</head>
+<body class="ar">
+    <!-- Background elements -->
+    <div class="bg-pattern"></div>
+    <div class="floating-circle circle-1"></div>
+    <div class="floating-circle circle-2"></div>
+    
+    <!-- Notification -->
+    <div id="notification" class="notification">
+        <span id="notification-text"></span>
+    </div>
+    
+    <!-- Navbar -->
+    <nav class="navbar fixed top-0 inset-x-0 z-10 px-4 py-3 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center">
+                <div class="ai-logo">
+                    <span>AI</span>
+                </div>
+                <h1 class="text-2xl font-bold text-white" data-lang-ar="محسن البرومبت للذكاء الاصطناعي" data-lang-en="AI Prompt Enhancer">محسن البرومبت للذكاء الاصطناعي</h1>
+            </div>
+            
+            <div class="flex items-center">
+                <div class="flex items-center mr-4">
+                    <span class="mr-2" data-lang-ar="عربي" data-lang-en="English">عربي</span>
+                    <label class="switch">
+                        <input type="checkbox" id="language-toggle">
+                        <span class="slider"></span>
+                    </label>
+                    <span class="ml-2" data-lang-ar="English" data-lang-en="عربي">English</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <div class="container mx-auto pt-24 pb-10 px-4">
+        <!-- Header Section -->
+        <div class="text-center mb-12 opacity-0 fade-in fade-in-1">
+            <h2 class="text-3xl font-bold mb-4" data-lang-ar="حسّن برومبت الذكاء الاصطناعي بسهولة" data-lang-en="Enhance AI Prompts Easily">حسّن برومبت الذكاء الاصطناعي بسهولة</h2>
+            <p class="text-xl text-gray-300 max-w-3xl mx-auto" data-lang-ar="أداة متكاملة لتحسين وتخصيص البرومبت للحصول على نتائج أفضل من أنظمة الذكاء الاصطناعي" data-lang-en="An integrated tool to enhance and customize prompts for better results from AI systems">أداة متكاملة لتحسين وتخصيص البرومبت للحصول على نتائج أفضل من أنظمة الذكاء الاصطناعي</p>
+        </div>
+        
+        <!-- Tabs Navigation -->
+        <div class="mb-6 opacity-0 fade-in fade-in-2">
+            <div class="flex flex-wrap border-b border-gray-700">
+                <button class="tab-button px-6 py-3 border-b-2 border-pink-500 text-pink-500 font-medium" data-tab="images" data-lang-ar="تحسين برومبت الصور" data-lang-en="Enhance Image Prompts">تحسين برومبت الصور</button>
+                <button class="tab-button px-6 py-3 border-b-2 border-transparent font-medium text-gray-400 hover:text-pink-500 transition-colors" data-tab="videos" data-lang-ar="تحسين برومبت الفيديو" data-lang-en="Enhance Video Prompts">تحسين برومبت الفيديو</button>
+                <button class="tab-button px-6 py-3 border-b-2 border-transparent font-medium text-gray-400 hover:text-pink-500 transition-colors" data-tab="templates" data-lang-ar="القوالب الجاهزة" data-lang-en="Ready Templates">القوالب الجاهزة</button>
+                <button class="tab-button px-6 py-3 border-b-2 border-transparent font-medium text-gray-400 hover:text-pink-500 transition-colors" data-tab="saved" data-lang-ar="البرومبتات المحفوظة" data-lang-en="Saved Prompts">البرومبتات المحفوظة</button>
+            </div>
+        </div>
+        
+        <!-- Content Sections -->
+        <div class="tab-content opacity-0 fade-in fade-in-3" id="images-content">
+            <div class="card p-6 mb-8">
+                <h3 class="text-xl font-bold mb-4" data-lang-ar="أدخل البرومبت الأساسي للصورة" data-lang-en="Enter Basic Image Prompt">أدخل البرومبت الأساسي للصورة</h3>
+                <div class="relative">
+                    <textarea id="image-prompt-input" class="w-full p-4 h-32 mb-2" placeholder="اكتب وصفاً للصورة التي تريد إنشاءها..." data-lang-ar-placeholder="اكتب وصفاً للصورة التي تريد إنشاءها..." data-lang-en-placeholder="Write a description for the image you want to create..."></textarea>
+                    <div id="image-word-count" class="word-count">0 كلمة</div>
+                </div>
+                
+                <div class="mb-6">
+                    <h4 class="text-lg font-medium mb-2" data-lang-ar="الكلمات المقترحة" data-lang-en="Suggested Keywords">الكلمات المقترحة</h4>
+                    <div class="tags-container">
+                        <span class="tag" data-lang-ar="عالي الدقة" data-lang-en="high resolution">عالي الدقة</span>
+                        <span class="tag" data-lang-ar="إضاءة دراماتيكية" data-lang-en="dramatic lighting">إضاءة دراماتيكية</span>
+                        <span class="tag" data-lang-ar="تفاصيل واقعية" data-lang-en="realistic details">تفاصيل واقعية</span>
+                        <span class="tag" data-lang-ar="8K" data-lang-en="8K">8K</span>
+                        <span class="tag" data-lang-ar="تصوير احترافي" data-lang-en="professional photography">تصوير احترافي</span>
+                        <span class="tag" data-lang-ar="سينمائي" data-lang-en="cinematic">سينمائي</span>
+                    </div>
+                </div>
+                
+                <h4 class="text-lg font-medium mb-2" data-lang-ar="خيارات تحسين" data-lang-en="Enhancement Options">خيارات تحسين</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium mb-1" data-lang-ar="نمط الصورة" data-lang-en="Image Style">نمط الصورة</label>
+                        <select id="image-style" class="w-full p-2 bg-gray-800 border border-gray-700 rounded">
+                            <option value="" data-lang-ar="اختر النمط..." data-lang-en="Choose style...">اختر النمط...</option>
+                            <option value="realistic" data-lang-ar="واقعي" data-lang-en="Realistic">واقعي</option>
+                            <option value="artistic" data-lang-ar="فني" data-lang-en="Artistic">فني</option>
+                            <option value="cinematic" data-lang-ar="سينمائي" data-lang-en="Cinematic">سينمائي</option>
+                            <option value="3d" data-lang-ar="ثلاثي الأبعاد" data-lang-en="3D">ثلاثي الأبعاد</option>
+                            <option value="anime" data-lang-ar="أنمي" data-lang-en="Anime">أنمي</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1" data-lang-ar="الإضاءة" data-lang-en="Lighting">الإضاءة</label>
+                        <select id="image-lighting" class="w-full p-2 bg-gray-800 border border-gray-700 rounded">
+                            <option value="" data-lang-ar="اختر الإضاءة..." data-lang-en="Choose lighting...">اختر الإضاءة...</option>
+                            <option value="natural" data-lang-ar="طبيعية" data-lang-en="Natural">طبيعية</option>
+                            <option value="studio" data-lang-ar="استوديو" data-lang-en="Studio">استوديو</option>
+                            <option value="dramatic" data-lang-ar="دراماتيكية" data-lang-en="Dramatic">دراماتيكية</option>
+                            <option value="neon" data-lang-ar="نيون" data-lang-en="Neon">نيون</option>
+                            <option value="golden-hour" data-lang-ar="الساعة الذهبية" data-lang-en="Golden Hour">الساعة الذهبية</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1" data-lang-ar="جودة التفاصيل" data-lang-en="Detail Quality">جودة التفاصيل</label>
+                        <select id="image-quality" class="w-full p-2 bg-gray-800 border border-gray-700 rounded">
+                            <option value="" data-lang-ar="اختر الجودة..." data-lang-en="Choose quality...">اختر الجودة...</option>
+                            <option value="high" data-lang-ar="عالية" data-lang-en="High">عالية</option>
+                            <option value="ultra" data-lang-ar="فائقة" data-lang-en="Ultra">فائقة</option>
+                            <option value="8k" data-lang-ar="8K" data-lang-en="8K">8K</option>
+                            <option value="hdr" data-lang-ar="HDR" data-lang-en="HDR">HDR</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-lg font-medium mb-2" data-lang-ar="البرومبت السلبي (ما لا تريد ظهوره)" data-lang-en="Negative Prompt (what you don't want to appear)">البرومبت السلبي (ما لا تريد ظهوره)</label>
+                    <textarea id="image-negative-prompt" class="w-full p-4 h-20" placeholder="أدخل العناصر التي لا تريد ظهورها في الصورة..." data-lang-ar-placeholder="أدخل العناصر التي لا تريد ظهورها في الصورة..." data-lang-en-placeholder="Enter elements you don't want to appear in the image..."></textarea>
+                </div>
+                
+                <h3 class="text-xl font-bold mb-4" data-lang-ar="النتيجة" data-lang-en="Result">النتيجة</h3>
+                <div id="image-result" class="p-4 bg-gray-900 rounded-lg mb-6 min-h-24 border border-gray-700">
+                    <p class="text-gray-400 italic" data-lang-ar="النتيجة ستظهر هنا..." data-lang-en="Result will appear here...">النتيجة ستظهر هنا...</p>
+                </div>
+                
+                <div class="flex flex-wrap gap-3">
+                    <button id="enhance-image-btn" class="btn-primary px-6 py-2 rounded-lg font-medium glow" data-lang-ar="تحسين البرومبت" data-lang-en="Enhance Prompt">تحسين البرومبت</button>
+                    <button id="copy-image-btn" class="btn-outline px-6 py-2 rounded-lg font-medium" data-lang-ar="نسخ" data-lang-en="Copy">نسخ</button>
+                    <button id="save-image-btn" class="btn-outline px-6 py-2 rounded-lg font-medium" data-lang-ar="حفظ" data-lang-en="Save">حفظ</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content hidden opacity-0 fade-in fade-in-3" id="videos-content">
+            <div class="card p-6 mb-8">
+                <h3 class="text-xl font-bold mb-4" data-lang-ar="أدخل البرومبت الأساسي للفيديو" data-lang-en="Enter Basic Video Prompt">أدخل البرومبت الأساسي للفيديو</h3>
+                <div class="relative">
+                    <textarea id="video-prompt-input" class="w-full p-4 h-32 mb-2" placeholder="اكتب وصفاً للفيديو الذي تريد إنشاءه..." data-lang-ar-placeholder="اكتب وصفاً للفيديو الذي تريد إنشاءه..." data-lang-en-placeholder="Write a description for the video you want to create..."></textarea>
+                    <div id="video-word-count" class="word-count">0 كلمة</div>
+                </div>
+                
+                <div class="mb-6">
+                    <h4 class="text-lg font-medium mb-2" data-lang-ar="الكلمات المقترحة" data-lang-en="Suggested Keywords">الكلمات المقترحة</h4>
+                    <div class="tags-container">
+                        <span class="tag" data-lang-ar="حركة سلسة" data-lang-en="smooth motion">حركة سلسة</span>
+                        <span class="tag" data-lang-ar="4K" data-lang-en="4K">4K</span>
+                        <span class="tag" data-lang-ar="حركة بطيئة" data-lang-en="slow motion">حركة بطيئة</span>
+                        <span class="tag" data-lang-ar="تصوير سينمائي" data-lang-en="cinematic shot">تصوير سينمائي</span>
+                        <span class="tag" data-lang-ar="إضاءة متغيرة" data-lang-en="dynamic lighting">إضاءة متغيرة</span>
+                        <span class="tag" data-lang-ar="تأثيرات بصرية" data-lang-en="visual effects">تأثيرات بصرية</span>
+                    </div>
+                </div>
+                
+                <h4 class="text-lg font-medium mb-2" data-lang-ar="خيارات تحسين" data-lang-en="Enhancement Options">خيارات تحسين</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium mb-1" data-lang-ar="نمط الفيديو" data-lang-en="Video Style">نمط الفيديو</label>
+                        <select id="video-style" class="w-full p-2 bg-gray-800 border border-gray-700 rounded">
+                            <option value="" data-lang-ar="اختر النمط..." data-lang-en="Choose style...">اختر النمط...</option>
+                            <option value="realistic" data-lang-ar="واقعي" data-lang-en="Realistic">واقعي</option>
+                            <option value="cinematic" data-lang-ar="سينمائي" data-lang-en="Cinematic">سينمائي</option>
+                            <option value="3d" data-lang-ar="ثلاثي الأبعاد" data-lang-en="3D">ثلاثي الأبعاد</option>
+                            <option value="anime" data-lang-ar="أنمي" data-lang-en="Anime">أنمي</option>
+                            <option value="timelapse" data-lang-ar="تايم لابس" data-lang-en="Timelapse">تايم لابس</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1" data-lang-ar="حركة الكاميرا" data-lang-en="Camera Movement">حركة الكاميرا</label>
+                        <select id="camera-movement" class="w-full p-2 bg-gray-800 border border-gray-700 rounded">
+                            <option value="" data-lang-ar="اختر الحركة..." data-lang-en="Choose movement...">اختر الحركة...</option>
+                            <option value="steady" data-lang-ar="ثابتة" data-lang-en="Steady">ثابتة</option>
+                            <option value="tracking" data-lang-ar="تتبع" data-lang-en="Tracking">تتبع</option>
+                            <option value="panning" data-lang-ar="بانوراما" data-lang-en="Panning">بانوراما</option>
+                            <option value="aerial" data-lang-ar="جوية" data-lang-en="Aerial">جوية</option>
+                            <option value="dolly" data-lang-ar="دولي زوم" data-lang-en="Dolly Zoom">دولي زوم</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1" data-lang-ar="جودة الفيديو" data-lang-en="Video Quality">جودة الفيديو</label>
+                        <select id="video-quality" class="w-full p-2 bg-gray-800 border border-gray-700 rounded">
+                            <option value="" data-lang-ar="اختر الجودة..." data-lang-en="Choose quality...">اختر الجودة...</option>
+                            <option value="high" data-lang-ar="عالية" data-lang-en="High">عالية</option>
+                            <option value="4k" data-lang-ar="4K" data-lang-en="4K">4K</option>
+                            <option value="hfr" data-lang-ar="معدل إطارات عالي" data-lang-en="High Frame Rate">معدل إطارات عالي</option>
+                            <option value="filmic" data-lang-ar="مظهر فيلمي" data-lang-en="Filmic Look">مظهر فيلمي</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-lg font-medium mb-2" data-lang-ar="البرومبت السلبي (ما لا تريد ظهوره)" data-lang-en="Negative Prompt (what you don't want to appear)">البرومبت السلبي (ما لا تريد ظهوره)</label>
+                    <textarea id="video-negative-prompt" class="w-full p-4 h-20" placeholder="أدخل العناصر التي لا تريد ظهورها في الفيديو..." data-lang-ar-placeholder="أدخل العناصر التي لا تريد ظهورها في الفيديو..." data-lang-en-placeholder="Enter elements you don't want to appear in the video..."></textarea>
+                </div>
+                
+                <h3 class="text-xl font-bold mb-4" data-lang-ar="النتيجة" data-lang-en="Result">النتيجة</h3>
+                <div id="video-result" class="p-4 bg-gray-900 rounded-lg mb-6 min-h-24 border border-gray-700">
+                    <p class="text-gray-400 italic" data-lang-ar="النتيجة ستظهر هنا..." data-lang-en="Result will appear here...">النتيجة ستظهر هنا...</p>
+                </div>
+                
+                <div class="flex flex-wrap gap-3">
+                    <button id="enhance-video-btn" class="btn-primary px-6 py-2 rounded-lg font-medium glow" data-lang-ar="تحسين البرومبت" data-lang-en="Enhance Prompt">تحسين البرومبت</button>
+                    <button id="copy-video-btn" class="btn-outline px-6 py-2 rounded-lg font-medium" data-lang-ar="نسخ" data-lang-en="Copy">نسخ</button>
+                    <button id="save-video-btn" class="btn-outline px-6 py-2 rounded-lg font-medium" data-lang-ar="حفظ" data-lang-en="Save">حفظ</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content hidden opacity-0 fade-in fade-in-3" id="templates-content">
+            <div class="card p-6 mb-8">
+                <h3 class="text-xl font-bold mb-4" data-lang-ar="القوالب الجاهزة" data-lang-en="Ready Templates">القوالب الجاهزة</h3>
+                <p class="mb-6" data-lang-ar="اختر من القوالب الجاهزة للحصول على نتائج احترافية سريعة" data-lang-en="Choose from ready templates for quick professional results">اختر من القوالب الجاهزة للحصول على نتائج احترافية سريعة</p>
+                
+                <div class="mb-4">
+                    <h4 class="text-lg font-medium mb-2" data-lang-ar="قوالب الصور" data-lang-en="Image Templates">قوالب الصور</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="template-card p-4 h-full" data-template="image-portrait">
+                            <h5 class="font-medium mb-2" data-lang-ar="بورتريه احترافي" data-lang-en="Professional Portrait">بورتريه احترافي</h5>
+                            <p class="text-sm text-gray-400" data-lang-ar="صورة بورتريه مع إضاءة استوديو احترافية وخلفية ناعمة" data-lang-en="Portrait image with professional studio lighting and soft background">صورة بورتريه مع إضاءة استوديو احترافية وخلفية ناعمة</p>
+                        </div>
+                        <div class="template-card p-4 h-full" data-template="image-landscape">
+                            <h5 class="font-medium mb-2" data-lang-ar="منظر طبيعي" data-lang-en="Landscape">منظر طبيعي</h5>
+                            <p class="text-sm text-gray-400" data-lang-ar="منظر طبيعي خلاب بإضاءة الغروب وتفاصيل عالية الدقة" data-lang-en="Beautiful landscape with sunset lighting and high detail">منظر طبيعي خلاب بإضاءة الغروب وتفاصيل عالية الدقة</p>
+                        </div>
+                        <div class="template-card p-4 h-full" data-template="image-product">
+                            <h5 class="font-medium mb-2" data-lang-ar="تصوير منتج" data-lang-en="Product Photography">تصوير منتج</h5>
+                            <p class="text-sm text-gray-400" data-lang-ar="صورة منتج احترافية بخلفية بيضاء وإضاءة استوديو نظيفة" data-lang-en="Professional product photo with white background and clean studio lighting">صورة منتج احترافية بخلفية بيضاء وإضاءة استوديو نظيفة</p>
+                        </div>
+                        <div class="template-card p-4 h-full" data-template="image-fantasy">
+                            <h5 class="font-medium mb-2" data-lang-ar="مشهد خيالي" data-lang-en="Fantasy Scene">مشهد خيالي</h5>
+                            <p class="text-sm text-gray-400" data-lang-ar="مشهد خيالي ملحمي مع إضاءة سحرية وعناصر فانتازية" data-lang-en="Epic fantasy scene with magical lighting and fantasy elements">مشهد خيالي ملحمي مع إضاءة سحرية وعناصر فانتازية</p>
+                        </div>
+                        <div class="template-card p-4 h-full" data-template="image-cyberpunk">
+                            <h5 class="font-medium mb-2" data-lang-ar="سايبربانك" data-lang-en="Cyberpunk">سايبربانك</h5>
+                            <p class="text-sm text-gray-400" data-lang-ar="مشهد مستقبلي بطابع سايبربانك مع أضواء نيون وتكنولوجيا متقدمة" data-lang-en="Futuristic cyberpunk scene with neon lights and advanced technology">مشهد مستقبلي بطابع سايبربانك مع أضواء نيون وتكنولوجيا متقدمة</p>
+                        </div>
+                        <div class="template-card p-4 h-full" data-template="image-food">
+                            <h5 class="font-medium mb-2" data-lang-ar="تصوير طعام" data-lang-en="Food Photography">تصوير طعام</h5>
+                            <p class="text-sm text-gray-400" data-lang-ar="صورة طعام شهية مع إضاءة طبيعية وتصوير احترافي" data-lang-en="Appetizing food image with natural lighting and professional photography">صورة طعام شهية مع إضاءة طبيعية وتصوير احترافي</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-medium mb-2" data-lang-ar="قوالب الفيديو" data-lang-en="Video Templates">قوالب الفيديو</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="template-card p-4 h-full" data-template="video-cinematic">
+                            <h5 class="font-medium mb-2" data-lang-ar="لقطة سينمائية" data-lang-en="Cinematic Shot">لقطة سينمائية</h5>
+                            <p class="text-sm text-gray-400" data-lang-ar="فيديو بمظهر سينمائي مع حركة كاميرا سلسة وتعديل ألوان احترافي" data-lang-en="Video with cinematic look, smooth camera movement and professional color grading">فيديو بمظهر سينمائي مع حركة كاميرا سلسة وتعديل ألوان احترافي</p>
+                        </div>
+                        <div class="template-card p-4 h-full" data-template="video-aerial">
+                            <h5 class="font-medium mb-2" data-lang-ar="لقطة جوية" data-lang-en="Aerial Shot">لقطة جوية</h5>
+                            <p class="text-sm text-gray-400" data-lang-ar="فيديو بزاوية جوية يعرض مناظر بانورامية مذهلة من الأعلى" data-lang-en="Aerial perspective video showing stunning panoramic views from above">فيديو بزاوية جوية يعرض مناظر بانورامية مذهلة من الأعلى</p>
+                        </div>
+                        <div class="template-card p-4 h-full" data-template="video-timelapse">
+                            <h5 class="font-medium mb-2" data-lang-ar="تايم لابس" data-lang-en="Timelapse">تايم لابس</h5>
+                            <p class="text-sm text-gray-400" data-lang-ar="فيديو تايم لابس يظهر تغير الزمن بشكل سلس وسريع" data-lang-en="Timelapse video showing time change smoothly and quickly">فيديو تايم لابس يظهر تغير الزمن بشكل سلس وسريع</p>
+                        </div>
+                        <div class="template-card p-4 h-full" data-template="video-slowmotion">
+                            <h5 class="font-medium mb-2" data-lang-ar="حركة بطيئة" data-lang-en="Slow Motion">حركة بطيئة</h5>
+                            <p class="text-sm text-gray-400" data-lang-ar="فيديو بحركة بطيئة درامية مع تفاصيل عالية الدقة" data-lang-en="Dramatic slow motion video with high detail">فيديو بحركة بطيئة درامية مع تفاصيل عالية الدقة</p>
+                        </div>
+                        <div class="template-card p-4 h-full" data-template="video-loop">
+                            <h5 class="font-medium mb-2" data-lang-ar="فيديو متكرر" data-lang-en="Loop Video">فيديو متكرر</h5>
+                            <p class="text-sm text-gray-400" data-lang-ar="فيديو قصير متكرر بسلاسة، مثالي للخلفيات الحية" data-lang-en="Seamlessly looping short video, perfect for live backgrounds">فيديو قصير متكرر بسلاسة، مثالي للخلفيات الحية</p>
+                        </div>
+                        <div class="template-card p-4 h-full" data-template="video-vfx">
+                            <h5 class="font-medium mb-2" data-lang-ar="تأثيرات بصرية" data-lang-en="Visual Effects">تأثيرات بصرية</h5>
+                            <p class="text-sm text-gray-400" data-lang-ar="فيديو مع تأثيرات بصرية متقدمة ومؤثرات ضوئية مذهلة" data-lang-en="Video with advanced visual effects and stunning light effects">فيديو مع تأثيرات بصرية متقدمة ومؤثرات ضوئية مذهلة</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content hidden opacity-0 fade-in fade-in-3" id="saved-content">
+            <div class="card p-6 mb-8">
+                <h3 class="text-xl font-bold mb-4" data-lang-ar="البرومبتات المحفوظة" data-lang-en="Saved Prompts">البرومبتات المحفوظة</h3>
+                <div id="saved-prompts-container">
+                    <p class="text-gray-400 italic" data-lang-ar="لا توجد برومبتات محفوظة حالياً" data-lang-en="No saved prompts currently">لا توجد برومبتات محفوظة حالياً</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contact Section -->
+        <div class="card p-6 mb-8 opacity-0 fade-in fade-in-4">
+            <h3 class="text-xl font-bold mb-4" data-lang-ar="تواصل معنا" data-lang-en="Contact Us">تواصل معنا</h3>
+            <p class="mb-6" data-lang-ar="هل لديك سؤال أو اقتراح؟ لا تتردد في التواصل معنا" data-lang-en="Do you have a question or suggestion? Feel free to contact us">هل لديك سؤال أو اقتراح؟ لا تتردد في التواصل معنا</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-1" data-lang-ar="الاسم" data-lang-en="Name">الاسم</label>
+                        <input type="text" class="w-full p-3 bg-gray-800 border border-gray-700 rounded" placeholder="أدخل اسمك..." data-lang-ar-placeholder="أدخل اسمك..." data-lang-en-placeholder="Enter your name...">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-1" data-lang-ar="البريد الإلكتروني" data-lang-en="Email">البريد الإلكتروني</label>
+                        <input type="email" class="w-full p-3 bg-gray-800 border border-gray-700 rounded" placeholder="أدخل بريدك الإلكتروني..." data-lang-ar-placeholder="أدخل بريدك الإلكتروني..." data-lang-en-placeholder="Enter your email...">
+                    </div>
+                </div>
+                <div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-1" data-lang-ar="الرسالة" data-lang-en="Message">الرسالة</label>
+                        <textarea class="w-full p-3 bg-gray-800 border border-gray-700 rounded h-32" placeholder="أدخل رسالتك هنا..." data-lang-ar-placeholder="أدخل رسالتك هنا..." data-lang-en-placeholder="Enter your message here..."></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="contact-btn" class="btn-primary px-6 py-2 rounded-lg font-medium mt-4 glow" data-lang-ar="إرسال" data-lang-en="Send">إرسال</button>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 py-6">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-gray-400" data-lang-ar="© 2023 محسن البرومبت للذكاء الاصطناعي. جميع الحقوق محفوظة." data-lang-en="© 2023 AI Prompt Enhancer. All rights reserved.">© 2023 محسن البرومبت للذكاء الاصطناعي. جميع الحقوق محفوظة.</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Initialize the elements when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all fade-in elements
+            document.querySelectorAll('.opacity-0').forEach(el => {
+                el.classList.remove('opacity-0');
+            });
+            
+            // Tab functionality
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Reset all tabs
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('text-pink-500', 'border-pink-500');
+                        btn.classList.add('text-gray-400', 'border-transparent');
+                    });
+                    
+                    // Hide all tab contents
+                    tabContents.forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    
+                    // Set active tab
+                    button.classList.remove('text-gray-400', 'border-transparent');
+                    button.classList.add('text-pink-500', 'border-pink-500');
+                    
+                    // Show selected tab content
+                    const tabId = button.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-content`).classList.remove('hidden');
+                });
+            });
+            
+            // Word count functionality
+            document.getElementById('image-prompt-input').addEventListener('input', updateImageWordCount);
+            document.getElementById('video-prompt-input').addEventListener('input', updateVideoWordCount);
+            
+            // Enhance buttons
+            document.getElementById('enhance-image-btn').addEventListener('click', enhanceImagePrompt);
+            document.getElementById('enhance-video-btn').addEventListener('click', enhanceVideoPrompt);
+            
+            // Copy buttons
+            document.getElementById('copy-image-btn').addEventListener('click', () => copyPrompt('image-result'));
+            document.getElementById('copy-video-btn').addEventListener('click', () => copyPrompt('video-result'));
+            
+            // Save buttons
+            document.getElementById('save-image-btn').addEventListener('click', () => savePrompt('image'));
+            document.getElementById('save-video-btn').addEventListener('click', () => savePrompt('video'));
+            
+            // Contact button
+            document.getElementById('contact-btn').addEventListener('click', sendContactForm);
+            
+            // Tags functionality
+            document.querySelectorAll('.tag').forEach(tag => {
+                tag.addEventListener('click', function() {
+                    const isImageTab = document.getElementById('images-content').classList.contains('hidden') === false;
+                    const textareaId = isImageTab ? 'image-prompt-input' : 'video-prompt-input';
+                    const textarea = document.getElementById(textareaId);
+                    
+                    // Add the tag text to the textarea
+                    const tagText = this.textContent;
+                    if (textarea.value.trim() === '') {
+                        textarea.value = tagText;
+                    } else {
+                        textarea.value += ', ' + tagText;
+                    }
+                    
+                    // Update word count
+                    if (isImageTab) {
+                        updateImageWordCount();
+                    } else {
+                        updateVideoWordCount();
+                    }
+                    
+                    // Add active class temporarily
+                    this.classList.add('active');
+                    setTimeout(() => {
+                        this.classList.remove('active');
+                    }, 500);
+                });
+            });
+            
+            // Template card functionality
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const templateType = this.getAttribute('data-template');
+                    applyTemplate(templateType);
+                });
+            });
+            
+            // Language toggle
+            document.getElementById('language-toggle').addEventListener('change', toggleLanguage);
+            
+            // Load saved prompts
+            loadSavedPrompts();
+        });
+        
+        // Word count functions
+        function updateImageWordCount() {
+            const text = document.getElementById('image-prompt-input').value;
+            const wordCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+            const langDisplay = document.body.classList.contains('ar') ? ' كلمة' : ' words';
+            document.getElementById('image-word-count').textContent = wordCount + langDisplay;
+        }
+        
+        function updateVideoWordCount() {
+            const text = document.getElementById('video-prompt-input').value;
+            const wordCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+            const langDisplay = document.body.classList.contains('ar') ? ' كلمة' : ' words';
+            document.getElementById('video-word-count').textContent = wordCount + langDisplay;
+        }
+        
+        // Enhance prompt functions
+        function enhanceImagePrompt() {
+            const promptInput = document.getElementById('image-prompt-input').value.trim();
+            if (!promptInput) {
+                showNotification(
+                    document.body.classList.contains('ar') ? 
+                    'الرجاء إدخال برومبت أساسي أولاً' : 
+                    'Please enter a basic prompt first'
+                );
+                return;
+            }
+            
+            const style = document.getElementById('image-style').value;
+            const lighting = document.getElementById('image-lighting').value;
+            const quality = document.getElementById('image-quality').value;
+            const negativePrompt = document.getElementById('image-negative-prompt').value.trim();
+            
+            // Build enhanced prompt
+            let enhancedPrompt = promptInput;
+            
+            // Add style
+            if (style) {
+                if (style === 'realistic') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', صورة واقعية، تفاصيل عالية الدقة، فوتوغرافية' : 
+                        ', realistic image, high detail, photographic';
+                } else if (style === 'artistic') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', أسلوب فني، ألوان نابضة بالحياة، تكوين إبداعي' : 
+                        ', artistic style, vibrant colors, creative composition';
+                } else if (style === 'cinematic') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', مشهد سينمائي، إضاءة دراماتيكية، تكوين سينمائي' : 
+                        ', cinematic scene, dramatic lighting, cinematic composition';
+                } else if (style === '3d') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', نموذج ثلاثي الأبعاد، رسومات كمبيوتر، ملمس واقعي' : 
+                        ', 3D model, computer graphics, realistic textures';
+                } else if (style === 'anime') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', أسلوب أنمي، رسوم متحركة يابانية، ألوان زاهية' : 
+                        ', anime style, Japanese animation, vivid colors';
+                }
+            }
+            
+            // Add lighting
+            if (lighting) {
+                if (lighting === 'natural') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', إضاءة طبيعية، إضاءة النهار، ظلال ناعمة' : 
+                        ', natural lighting, daylight, soft shadows';
+                } else if (lighting === 'studio') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', إضاءة استوديو احترافية، إضاءة محترفة، إعداد استوديو' : 
+                        ', professional studio lighting, professional illumination, studio setup';
+                } else if (lighting === 'dramatic') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', إضاءة دراماتيكية، تباين عالي، ظلال قوية' : 
+                        ', dramatic lighting, high contrast, strong shadows';
+                } else if (lighting === 'neon') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', إضاءة نيون، ألوان ساطعة، أضواء زاهية' : 
+                        ', neon lighting, bright colors, vibrant lights';
+                } else if (lighting === 'golden-hour') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', إضاءة الساعة الذهبية، ضوء الغروب، دفء اللون' : 
+                        ', golden hour lighting, sunset light, warm tone';
+                }
+            }
+            
+            // Add quality
+            if (quality) {
+                if (quality === 'high') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', جودة عالية، تفاصيل دقيقة، دقة عالية' : 
+                        ', high quality, fine details, high resolution';
+                } else if (quality === 'ultra') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', جودة فائقة، تفاصيل مذهلة، دقة فائقة، تفاصيل دقيقة' : 
+                        ', ultra quality, stunning details, ultra-high resolution, fine details';
+                } else if (quality === '8k') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', دقة 8K، تفاصيل فائقة الدقة، وضوح استثنائي' : 
+                        ', 8K resolution, ultra-detailed, exceptional clarity';
+                } else if (quality === 'hdr') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', HDR، نطاق ديناميكي عالي، ألوان غنية، تباين مذهل' : 
+                        ', HDR, high dynamic range, rich colors, stunning contrast';
+                }
+            }
+            
+            // Add professional touch
+            enhancedPrompt += document.body.classList.contains('ar') ? 
+                ', تصوير فوتوغرافي احترافي، تكوين مثالي، تفاصيل دقيقة، جودة استثنائية' : 
+                ', professional photography, perfect composition, intricate details, exceptional quality';
+            
+            // Display result
+            const resultDiv = document.getElementById('image-result');
+            let resultHtml = '';
+            
+            if (document.body.classList.contains('ar')) {
+                resultHtml = `<strong>البرومبت المحسّن:</strong><br>${enhancedPrompt}`;
+                if (negativePrompt) {
+                    resultHtml += `<br><br><strong>البرومبت السلبي:</strong><br>${negativePrompt}`;
+                }
+            } else {
+                resultHtml = `<strong>Enhanced Prompt:</strong><br>${enhancedPrompt}`;
+                if (negativePrompt) {
+                    resultHtml += `<br><br><strong>Negative Prompt:</strong><br>${negativePrompt}`;
+                }
+            }
+            
+            resultDiv.innerHTML = resultHtml;
+            
+            // Show success notification
+            showNotification(
+                document.body.classList.contains('ar') ? 
+                'تم تحسين البرومبت بنجاح!' : 
+                'Prompt successfully enhanced!'
+            );
+        }
+        
+        function enhanceVideoPrompt() {
+            const promptInput = document.getElementById('video-prompt-input').value.trim();
+            if (!promptInput) {
+                showNotification(
+                    document.body.classList.contains('ar') ? 
+                    'الرجاء إدخال برومبت أساسي أولاً' : 
+                    'Please enter a basic prompt first'
+                );
+                return;
+            }
+            
+            const style = document.getElementById('video-style').value;
+            const cameraMovement = document.getElementById('camera-movement').value;
+            const quality = document.getElementById('video-quality').value;
+            const negativePrompt = document.getElementById('video-negative-prompt').value.trim();
+            
+            // Build enhanced prompt
+            let enhancedPrompt = promptInput;
+            
+            // Add style
+            if (style) {
+                if (style === 'realistic') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', فيديو واقعي، تفاصيل عالية الدقة، مظهر طبيعي' : 
+                        ', realistic video, high detail, natural look';
+                } else if (style === 'cinematic') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', فيديو سينمائي، تعديل ألوان احترافي، نسبة عرض سينمائية' : 
+                        ', cinematic video, professional color grading, cinematic aspect ratio';
+                } else if (style === '3d') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', تحريك ثلاثي الأبعاد، رسومات كمبيوتر، ملمس واقعي' : 
+                        ', 3D animation, computer graphics, realistic textures';
+                } else if (style === 'anime') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', أسلوب أنمي، رسوم متحركة يابانية، حركة سلسة' : 
+                        ', anime style, Japanese animation, fluid movement';
+                } else if (style === 'timelapse') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', تايم لابس، حركة سريعة، تغير الزمن' : 
+                        ', timelapse, fast motion, time change';
+                }
+            }
+            
+            // Add camera movement
+            if (cameraMovement) {
+                if (cameraMovement === 'steady') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', كاميرا ثابتة، تصوير مستقر تماماً، لقطة ثابتة' : 
+                        ', steady camera, perfectly stabilized, static shot';
+                } else if (cameraMovement === 'tracking') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', لقطة تتبع، حركة كاميرا سلسة، تتبع الموضوع' : 
+                        ', tracking shot, smooth camera movement, following the subject';
+                } else if (cameraMovement === 'panning') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', حركة بانوراما أفقية، كاميرا متحركة، مسح أفقي' : 
+                        ', panning shot, moving camera, horizontal sweep';
+                } else if (cameraMovement === 'aerial') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', لقطة جوية، تصوير من الأعلى، منظر بانورامي' : 
+                        ', aerial shot, filmed from above, panoramic view';
+                } else if (cameraMovement === 'dolly') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', حركة دولي زوم، تأثير هيتشكوك، تغيير المنظور' : 
+                        ', dolly zoom, Hitchcock effect, changing perspective';
+                }
+            }
+            
+            // Add quality
+            if (quality) {
+                if (quality === 'high') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', جودة عالية، تفاصيل واضحة، دقة عالية' : 
+                        ', high quality, clear details, high resolution';
+                } else if (quality === '4k') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', دقة 4K، جودة فائقة، وضوح استثنائي' : 
+                        ', 4K resolution, ultra quality, exceptional clarity';
+                } else if (quality === 'hfr') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', معدل إطارات عالي، 60 إطار في الثانية، حركة سلسة للغاية' : 
+                        ', high frame rate, 60fps, extremely smooth motion';
+                } else if (quality === 'filmic') {
+                    enhancedPrompt += document.body.classList.contains('ar') ? 
+                        ', مظهر فيلمي، تدرج الألوان السينمائي، تباين سينمائي' : 
+                        ', filmic look, cinematic color grading, cinematic contrast';
+                }
+            }
+            
+            // Add professional touch
+            enhancedPrompt += document.body.classList.contains('ar') ? 
+                ', إنتاج فيديو احترافي، جودة استثنائية، حركة سلسة، إضاءة متقنة' : 
+                ', professional video production, exceptional quality, fluid motion, masterful lighting';
+            
+            // Display result
+            const resultDiv = document.getElementById('video-result');
+            let resultHtml = '';
+            
+            if (document.body.classList.contains('ar')) {
+                resultHtml = `<strong>البرومبت المحسّن:</strong><br>${enhancedPrompt}`;
+                if (negativePrompt) {
+                    resultHtml += `<br><br><strong>البرومبت السلبي:</strong><br>${negativePrompt}`;
+                }
+            } else {
+                resultHtml = `<strong>Enhanced Prompt:</strong><br>${enhancedPrompt}`;
+                if (negativePrompt) {
+                    resultHtml += `<br><br><strong>Negative Prompt:</strong><br>${negativePrompt}`;
+                }
+            }
+            
+            resultDiv.innerHTML = resultHtml;
+            
+            // Show success notification
+            showNotification(
+                document.body.classList.contains('ar') ? 
+                'تم تحسين البرومبت بنجاح!' : 
+                'Prompt successfully enhanced!'
+            );
+        }
+        
+        // Copy function
+        function copyPrompt(elementId) {
+            const resultDiv = document.getElementById(elementId);
+            let textToCopy = resultDiv.textContent;
+            
+            // Remove the headers (Enhanced Prompt: and Negative Prompt:)
+            textToCopy = textToCopy.replace(/^(البرومبت المحسّن:|Enhanced Prompt:)/gm, '').trim();
+            textToCopy = textToCopy.replace(/^(البرومبت السلبي:|Negative Prompt:)/gm, '\nNegative Prompt:').trim();
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showNotification(
+                    document.body.classList.contains('ar') ? 
+                    'تم نسخ البرومبت بنجاح!' : 
+                    'Prompt copied successfully!'
+                );
+            }).catch(err => {
+                console.error('Error copying text: ', err);
+                showNotification(
+                    document.body.classList.contains('ar') ? 
+                    'حدث خطأ أثناء النسخ' : 
+                    'Error copying text'
+                );
+            });
+        }
+        
+        // Save prompt function
+        function savePrompt(type) {
+            const resultElementId = type === 'image' ? 'image-result' : 'video-result';
+            const promptContent = document.getElementById(resultElementId).innerHTML;
+            
+            if (promptContent.includes(document.body.classList.contains('ar') ? 'النتيجة ستظهر هنا' : 'Result will appear here')) {
+                showNotification(
+                    document.body.classList.contains('ar') ? 
+                    'لا يوجد برومبت لحفظه' : 
+                    'No prompt to save'
+                );
+                return;
+            }
+            
+            const promptInput = document.getElementById(`${type}-prompt-input`).value;
+            const promptTitle = promptInput.length > 30 ? promptInput.substring(0, 30) + '...' : promptInput;
+            
+            // Get saved prompts from localStorage
+            let savedPrompts = JSON.parse(localStorage.getItem('aiPromptEnhancerSavedPrompts')) || [];
+            
+            // Add new prompt
+            savedPrompts.push({
+                id: Date.now(),
+                title: promptTitle,
+                type: type,
+                content: promptContent,
+                timestamp: new Date().toLocaleString()
+            });
+            
+            // Save back to localStorage
+            localStorage.setItem('aiPromptEnhancerSavedPrompts', JSON.stringify(savedPrompts));
+            
+            // Update the saved prompts display if visible
+            if (!document.getElementById('saved-content').classList.contains('hidden')) {
+                loadSavedPrompts();
+            }
+            
+            showNotification(
+                document.body.classList.contains('ar') ? 
+                'تم حفظ البرومبت بنجاح!' : 
+                'Prompt saved successfully!'
+            );
+        }
+        
+        // Load saved prompts
+        function loadSavedPrompts() {
+            const container = document.getElementById('saved-prompts-container');
+            let savedPrompts = JSON.parse(localStorage.getItem('aiPromptEnhancerSavedPrompts')) || [];
+            
+            if (savedPrompts.length === 0) {
+                container.innerHTML = `<p class="text-gray-400 italic">${document.body.classList.contains('ar') ? 'لا توجد برومبتات محفوظة حالياً' : 'No saved prompts currently'}</p>`;
+                return;
+            }
+            
+            let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+            
+            // Sort by newest first
+            savedPrompts.sort((a, b) => b.id - a.id);
+            
+            savedPrompts.forEach(prompt => {
+                const typeLabel = prompt.type === 'image' ? 
+                    (document.body.classList.contains('ar') ? 'صورة' : 'Image') : 
+                    (document.body.classList.contains('ar') ? 'فيديو' : 'Video');
+                
+                html += `
+                <div class="saved-prompt p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="font-medium">${prompt.title}</h4>
+                        <span class="bg-pink-600 text-xs text-white px-2 py-1 rounded">${typeLabel}</span>
+                    </div>
+                    <p class="text-sm text-gray-400 mb-2">${prompt.timestamp}</p>
+                    <div class="flex gap-2">
+                        <button class="btn-outline text-sm px-3 py-1 rounded" onclick="loadPrompt(${prompt.id})">${document.body.classList.contains('ar') ? 'تحميل' : 'Load'}</button>
+                        <button class="btn-outline text-sm px-3 py-1 rounded text-red-500 border-red-500 hover:bg-red-500" onclick="deletePrompt(${prompt.id})">${document.body.classList.contains('ar') ? 'حذف' : 'Delete'}</button>
+                    </div>
+                </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        // Load a saved prompt
+        function loadPrompt(id) {
+            let savedPrompts = JSON.parse(localStorage.getItem('aiPromptEnhancerSavedPrompts')) || [];
+            const prompt = savedPrompts.find(p => p.id === id);
+            
+            if (!prompt) return;
+            
+            // Switch to appropriate tab
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                if (btn.getAttribute('data-tab') === (prompt.type === 'image' ? 'images' : 'videos')) {
+                    btn.click();
+                }
+            });
+            
+            // Load content into result div
+            const resultElementId = prompt.type === 'image' ? 'image-result' : 'video-result';
+            document.getElementById(resultElementId).innerHTML = prompt.content;
+            
+            showNotification(
+                document.body.classList.contains('ar') ? 
+                'تم تحميل البرومبت بنجاح!' : 
+                'Prompt loaded successfully!'
+            );
+        }
+        
+        // Delete a saved prompt
+        function deletePrompt(id) {
+            if (!confirm(document.body.classList.contains('ar') ? 'هل أنت متأكد من حذف هذا البرومبت؟' : 'Are you sure you want to delete this prompt?')) {
+                return;
+            }
+            
+            let savedPrompts = JSON.parse(localStorage.getItem('aiPromptEnhancerSavedPrompts')) || [];
+            savedPrompts = savedPrompts.filter(p => p.id !== id);
+            
+            localStorage.setItem('aiPromptEnhancerSavedPrompts', JSON.stringify(savedPrompts));
+            loadSavedPrompts();
+            
+            showNotification(
+                document.body.classList.contains('ar') ? 
+                'تم حذف البرومبت بنجاح!' : 
+                'Prompt deleted successfully!'
+            );
+        }
+        
+        // Apply template
+        function applyTemplate(templateType) {
+            let promptText, targetTab;
+            
+            if (templateType.startsWith('image-')) {
+                targetTab = 'images';
+                
+                switch(templateType) {
+                    case 'image-portrait':
+                        promptText = document.body.classList.contains('ar') ?
+                            'صورة بورتريه احترافية مع إضاءة استوديو ناعمة وخلفية مبهرة' :
+                            'Professional portrait with soft studio lighting and stunning background';
+                        
+                        document.getElementById('image-style').value = 'realistic';
+                        document.getElementById('image-lighting').value = 'studio';
+                        document.getElementById('image-quality').value = 'high';
+                        document.getElementById('image-negative-prompt').value = document.body.classList.contains('ar') ?
+                            'تشوهات الوجه، أيدي غير طبيعية، أصابع زائدة، نسب خاطئة' :
+                            'face deformities, unnatural hands, extra fingers, wrong proportions';
+                        break;
+                        
+                    case 'image-landscape':
+                        promptText = document.body.classList.contains('ar') ?
+                            'منظر طبيعي بانورامي خلاب مع إضاءة الغروب وسماء ملونة وتفاصيل طبيعية غنية' :
+                            'Stunning panoramic landscape with sunset lighting, colorful sky and rich natural details';
+                        
+                        document.getElementById('image-style').value = 'realistic';
+                        document.getElementById('image-lighting').value = 'golden-hour';
+                        document.getElementById('image-quality').value = '8k';
+                        document.getElementById('image-negative-prompt').value = document.body.classList.contains('ar') ?
+                            'مباني، أشخاص، نص، تشويش، ألوان باهتة' :
+                            'buildings, people, text, noise, washed-out colors';
+                        break;
+                        
+                    case 'image-product':
+                        promptText = document.body.classList.contains('ar') ?
+                            'صورة منتج احترافية بخلفية بيضاء نظيفة وإضاءة استوديو مثالية وظلال ناعمة' :
+                            'Professional product photo with clean white background, perfect studio lighting and soft shadows';
+                        
+                        document.getElementById('image-style').value = 'realistic';
+                        document.getElementById('image-lighting').value = 'studio';
+                        document.getElementById('image-quality').value = 'high';
+                        document.getElementById('image-negative-prompt').value = document.body.classList.contains('ar') ?
+                            'خلفية متسخة، ظلال قاسية، تشويش، أوساخ، إضاءة سيئة' :
+                            'dirty background, harsh shadows, noise, dirt, bad lighting';
+                        break;
+                        
+                    case 'image-fantasy':
+                        promptText = document.body.classList.contains('ar') ?
+                            'مشهد فانتازي ملحمي مع قلعة عائمة ومخلوقات أسطورية وإضاءة سحرية وسماء غامضة' :
+                            'Epic fantasy scene with floating castle, mythical creatures, magical lighting and mysterious sky';
+                        
+                        document.getElementById('image-style').value = 'artistic';
+                        document.getElementById('image-lighting').value = 'dramatic';
+                        document.getElementById('image-quality').value = 'ultra';
+                        document.getElementById('image-negative-prompt').value = document.body.classList.contains('ar') ?
+                            'واقعي جداً، مشهد حضري، أجهزة حديثة، سيارات، نص، أسلوب كرتوني' :
+                            'too realistic, urban scene, modern devices, cars, text, cartoonish style';
+                        break;
+                        
+                    case 'image-cyberpunk':
+                        promptText = document.body.classList.contains('ar') ?
+                            'مشهد مستقبلي بطابع سايبربانك مع أضواء نيون ملونة وناطحات سحاب عملاقة وتكنولوجيا متقدمة وسيارات طائرة' :
+                            'Futuristic cyberpunk scene with colorful neon lights, giant skyscrapers, advanced technology and flying cars';
+                        
+                        document.getElementById('image-style').value = 'cinematic';
+                        document.getElementById('image-lighting').value = 'neon';
+                        document.getElementById('image-quality').value = 'hdr';
+                        document.getElementById('image-negative-prompt').value = document.body.classList.contains('ar') ?
+                            'طابع قديم، عناصر تقليدية، ألوان باهتة، نهار مشمس' :
+                            'vintage look, traditional elements, washed-out colors, sunny daylight';
+                        break;
+                        
+                    case 'image-food':
+                        promptText = document.body.classList.contains('ar') ?
+                            'صورة طعام شهية احترافية مع إضاءة طبيعية ناعمة وتفاصيل دقيقة وألوان نابضة بالحياة' :
+                            'Appetizing professional food photo with soft natural lighting, fine details and vibrant colors';
+                        
+                        document.getElementById('image-style').value = 'realistic';
+                        document.getElementById('image-lighting').value = 'natural';
+                        document.getElementById('image-quality').value = 'high';
+                        document.getElementById('image-negative-prompt').value = document.body.classList.contains('ar') ?
+                            'طعام غير جذاب، ألوان باهتة، تشويش، إضاءة صناعية قاسية' :
+                            'unappealing food, washed-out colors, noise, harsh artificial lighting';
+                        break;
+                }
+                
+                document.getElementById('image-prompt-input').value = promptText;
+                updateImageWordCount();
+                
+            } else if (templateType.startsWith('video-')) {
+                targetTab = 'videos';
+                
+                switch(templateType) {
+                    case 'video-cinematic':
+                        promptText = document.body.classList.contains('ar') ?
+                            'فيديو بمظهر سينمائي مع حركة كاميرا سلسة وتعديل ألوان احترافي وتكوين دقيق' :
+                            'Video with cinematic look, smooth camera movement, professional color grading and precise composition';
+                        
+                        document.getElementById('video-style').value = 'cinematic';
+                        document.getElementById('camera-movement').value = 'tracking';
+                        document.getElementById('video-quality').value = 'filmic';
+                        document.getElementById('video-negative-prompt').value = document.body.classList.contains('ar') ?
+                            'اهتزاز الكاميرا، تقطيع، وميض، حركة غير طبيعية، ألوان غير واقعية' :
+                            'camera shake, stutter, flickering, unnatural movement, unrealistic colors';
+                        break;
+                        
+                    case 'video-aerial':
+                        promptText = document.body.classList.contains('ar') ?
+                            'لقطة جوية بانورامية تكشف مناظر طبيعية خلابة من الأعلى مع حركة كاميرا سلسة' :
+                            'Panoramic aerial shot revealing stunning landscapes from above with smooth camera movement';
+                        
+                        document.getElementById('video-style').value = 'realistic';
+                        document.getElementById('camera-movement').value = 'aerial';
+                        document.getElementById('video-quality').value = '4k';
+                        document.getElementById('video-negative-prompt').value = document.body.classList.contains('ar') ?
+                            'اهتزاز الكاميرا، ضباب، انخفاض الرؤية، تشوهات العدسة' :
+                            'camera shake, fog, low visibility, lens distortion';
+                        break;
+                        
+                    case 'video-timelapse':
+                        promptText = document.body.classList.contains('ar') ?
+                            'فيديو تايم لابس مذهل يظهر مرور الوقت بسلاسة مع تغير الإضاءة والظلال ديناميكياً' :
+                            'Stunning timelapse video showing the passage of time smoothly with dynamically changing lighting and shadows';
+                        
+                        document.getElementById('video-style').value = 'timelapse';
+                        document.getElementById('camera-movement').value = 'steady';
+                        document.getElementById('video-quality').value = '4k';
+                        document.getElementById('video-negative-prompt').value = document.body.classList.contains('ar') ?
+                            'حركة متقطعة، تغيرات مفاجئة، تشويش، اهتزاز' :
+                            'choppy movement, sudden changes, noise, jitter';
+                        break;
+                        
+                    case 'video-slowmotion':
+                        promptText = document.body.classList.contains('ar') ?
+                            'فيديو حركة بطيئة درامية مع تفاصيل فائقة الدقة وحركة سلسة للغاية وجودة فائقة' :
+                            'Dramatic slow-motion video with ultra-detailed visuals, extremely smooth motion and ultra-high quality';
+                        
+                        document.getElementById('video-style').value = 'cinematic';
+                        document.getElementById('camera-movement').value = 'tracking';
+                        document.getElementById('video-quality').value = 'hfr';
+                        document.getElementById('video-negative-prompt').value = document.body.classList.contains('ar') ?
+                            'حركة متقطعة، سرعة عادية، اهتزاز، تشويش' :
+                            'choppy movement, normal speed, jitter, noise';
+                        break;
+                        
+                    case 'video-loop':
+                        promptText = document.body.classList.contains('ar') ?
+                            'فيديو قصير متكرر بسلاسة تامة، مثالي للخلفيات الحية مع حركة مستمرة وانتقال لا نهائي' :
+                            'Short perfectly looping video, ideal for live backgrounds with continuous motion and seamless transition';
+                        
+                        document.getElementById('video-style').value = 'cinematic';
+                        document.getElementById('camera-movement').value = 'steady';
+                        document.getElementById('video-quality').value = 'high';
+                        document.getElementById('video-negative-prompt').value = document.body.classList.contains('ar') ?
+                            'قفزات ملحوظة، تغيير مفاجئ، نقطة انقطاع واضحة' :
+                            'noticeable jumps, sudden change, obvious breakpoint';
+                        break;
+                        
+                    case 'video-vfx':
+                        promptText = document.body.classList.contains('ar') ?
+                            'فيديو مع تأثيرات بصرية مذهلة وجسيمات ضوئية متوهجة وعناصر متحركة ديناميكية ومؤثرات خاصة متقدمة' :
+                            'Video with stunning visual effects, glowing light particles, dynamic moving elements and advanced special effects';
+                        
+                        document.getElementById('video-style').value = '3d';
+                        document.getElementById('camera-movement').value = 'tracking';
+                        document.getElementById('video-quality').value = 'hdr';
+                        document.getElementById('video-negative-prompt').value = document.body.classList.contains('ar') ?
+                            'تأثيرات بسيطة جداً، مظهر طبيعي، بدون مؤثرات، واقعي' :
+                            'too simple effects, natural look, no effects, realistic';
+                        break;
+                }
+                
+                document.getElementById('video-prompt-input').value = promptText;
+                updateVideoWordCount();
+            }
+            
+            // Switch to the appropriate tab
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                if (btn.getAttribute('data-tab') === targetTab) {
+                    btn.click();
+                }
+            });
+            
+            showNotification(
+                document.body.classList.contains('ar') ? 
+                'تم تطبيق القالب بنجاح!' : 
+                'Template applied successfully!'
+            );
+        }
+        
+        // Contact form submit (simulation)
+        function sendContactForm() {
+            showNotification(
+                document.body.classList.contains('ar') ? 
+                'تم إرسال رسالتك بنجاح! سنتواصل معك قريباً.' : 
+                'Your message has been sent successfully! We will contact you soon.'
+            );
+            
+            // Clear form
+            document.querySelectorAll('#contact-section input, #contact-section textarea').forEach(input => {
+                input.value = '';
+            });
+        }
+        
+        // Show notification
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            
+            notificationText.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            const isArabic = document.body.classList.contains('ar');
+            
+            if (isArabic) {
+                document.body.classList.remove('ar');
+                document.body.classList.add('en');
+                document.dir = 'ltr';
+            } else {
+                document.body.classList.remove('en');
+                document.body.classList.add('ar');
+                document.dir = 'rtl';
+            }
+            
+            // Update all text elements that have language attributes
+            document.querySelectorAll('[data-lang-ar]').forEach(el => {
+                if (document.body.classList.contains('ar')) {
+                    el.textContent = el.getAttribute('data-lang-ar');
+                } else {
+                    el.textContent = el.getAttribute('data-lang-en');
+                }
+            });
+            
+            // Update placeholders
+            document.querySelectorAll('[data-lang-ar-placeholder]').forEach(el => {
+                if (document.body.classList.contains('ar')) {
+                    el.placeholder = el.getAttribute('data-lang-ar-placeholder');
+                } else {
+                    el.placeholder = el.getAttribute('data-lang-en-placeholder');
+                }
+            });
+            
+            // Update word counts
+            updateImageWordCount();
+            updateVideoWordCount();
+            
+            // Update saved prompts display
+            if (!document.getElementById('saved-content').classList.contains('hidden')) {
+                loadSavedPrompts();
+            }
+        }
+    </script>
+</body>
+</html>
